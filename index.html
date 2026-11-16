@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a1a2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="元素の周期表を楽しく暗記できるクイズアプリ">
+  <title>元素マスター - 周期表暗記クイズ</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="images/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="images/icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- ===== スプラッシュ画面 ===== -->
+  <div id="splash-screen" class="screen active">
+    <div class="splash-content">
+      <div class="splash-icon">⚛️</div>
+      <h1 class="splash-title">元素マスター</h1>
+      <p class="splash-subtitle">周期表暗記クイズ</p>
+      <div class="splash-loader">
+        <div class="loader-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ホーム画面 ===== -->
+  <div id="home-screen" class="screen">
+    <header class="app-header">
+      <h1 class="app-title">⚛️ 元素マスター</h1>
+      <button id="btn-records" class="icon-btn" aria-label="学習記録">
+        <span class="icon">📊</span>
+      </button>
+    </header>
+
+    <main class="home-content">
+      <!-- クイズモード選択 -->
+      <section class="setting-section">
+        <h2 class="section-title">クイズモード</h2>
+        <div class="mode-cards">
+          <button class="mode-card active" data-mode="symbol">
+            <div class="mode-icon">🔤</div>
+            <div class="mode-info">
+              <div class="mode-name">記号モード</div>
+              <div class="mode-desc">元素記号から元素名を答える</div>
+            </div>
+          </button>
+          <button class="mode-card" data-mode="sequence">
+            <div class="mode-icon">🔢</div>
+            <div class="mode-info">
+              <div class="mode-name">順番モード</div>
+              <div class="mode-desc">次/前の元素を答える</div>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- カテゴリ選択 -->
+      <section class="setting-section">
+        <h2 class="section-title">出題範囲</h2>
+        <div class="category-grid">
+          <button class="category-btn active" data-category="all">
+            <span class="cat-icon">🌐</span>
+            <span class="cat-name">全元素</span>
+          </button>
+          <button class="category-btn" data-category="group">
+            <span class="cat-icon">↕️</span>
+            <span class="cat-name">族別</span>
+          </button>
+          <button class="category-btn" data-category="period">
+            <span class="cat-icon">↔️</span>
+            <span class="cat-name">周期別</span>
+          </button>
+          <button class="category-btn" data-category="lanthanide">
+            <span class="cat-icon">🔬</span>
+            <span class="cat-name">ランタノイド</span>
+          </button>
+          <button class="category-btn" data-category="actinide">
+            <span class="cat-icon">☢️</span>
+            <span class="cat-name">アクチノイド</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 族/周期の詳細選択（条件付き表示） -->
+      <section id="sub-category-section" class="setting-section hidden">
+        <h2 class="section-title" id="sub-category-title">族を選択</h2>
+        <div id="sub-category-grid" class="sub-category-grid">
+          <!-- 動的に生成 -->
+        </div>
+      </section>
+
+      <!-- 出題順序 -->
+      <section class="setting-section">
+        <h2 class="section-title">出題順序</h2>
+        <div class="order-toggle">
+          <button class="order-btn active" data-order="asc">
+            <span>昇順 ↑</span>
+            <small>原子番号の小さい順</small>
+          </button>
+          <button class="order-btn" data-order="desc">
+            <span>降順 ↓</span>
+            <small>原子番号の大きい順</small>
+          </button>
+        </div>
+      </section>
+
+      <!-- スタートボタン -->
+      <button id="btn-start" class="start-btn">
+        <span class="start-text">クイズスタート</span>
+        <span id="question-count" class="question-count">（全118問）</span>
+      </button>
+    </main>
+  </div>
+
+  <!-- ===== クイズ画面 ===== -->
+  <div id="quiz-screen" class="screen">
+    <header class="quiz-header">
+      <button id="btn-quit" class="icon-btn" aria-label="終了">
+        <span class="icon">✕</span>
+      </button>
+      <div class="quiz-progress">
+        <span id="quiz-current">1</span>
+        <span class="progress-sep">/</span>
+        <span id="quiz-total">118</span>
+      </div>
+      <div class="streak-badge" id="streak-badge">
+        <span class="streak-icon">🔥</span>
+        <span id="streak-count">0</span>
+      </div>
+    </header>
+
+    <!-- プログレスバー -->
+    <div class="progress-bar-container">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+
+    <!-- 問題エリア -->
+    <div id="question-area" class="question-area">
+      <!-- 記号モード用 -->
+      <div id="symbol-question" class="question-content">
+        <div class="element-display">
+          <div class="element-card-large">
+            <span class="element-number" id="q-number"></span>
+            <span class="element-symbol" id="q-symbol"></span>
+            <span class="element-category-label" id="q-category"></span>
+          </div>
+          <div class="element-image-container" id="q-image-container">
+            <img id="q-image" class="element-image" alt="元素の画像" loading="lazy">
+            <div id="q-image-placeholder" class="image-placeholder">
+              <span class="placeholder-symbol" id="q-placeholder-symbol"></span>
+            </div>
+          </div>
+        </div>
+        <p class="question-text">この元素の名前は？</p>
+      </div>
+
+      <!-- 順番モード用 -->
+      <div id="sequence-question" class="question-content hidden">
+        <div class="element-display">
+          <div class="element-card-large">
+            <span class="element-number" id="sq-number"></span>
+            <span class="element-symbol" id="sq-symbol"></span>
+            <span class="element-name-small" id="sq-name"></span>
+          </div>
+          <div class="element-image-container" id="sq-image-container">
+            <img id="sq-image" class="element-image" alt="元素の画像" loading="lazy">
+            <div id="sq-image-placeholder" class="image-placeholder">
+              <span class="placeholder-symbol" id="sq-placeholder-symbol"></span>
+            </div>
+          </div>
+        </div>
+        <p class="question-text" id="sequence-question-text">この元素の次の元素は？</p>
+      </div>
+    </div>
+
+    <!-- ヒントボタン -->
+    <button id="btn-hint" class="hint-btn">
+      <span class="hint-icon">💡</span>
+      <span>ヒントを見る</span>
+    </button>
+
+    <!-- ヒント表示エリア -->
+    <div id="hint-area" class="hint-area hidden">
+      <div class="hint-label">語呂合わせ</div>
+      <p id="hint-text" class="hint-text"></p>
+      <p id="hint-explanation" class="hint-explanation"></p>
+    </div>
+
+    <!-- 選択肢 -->
+    <div id="choices" class="choices">
+      <button class="choice-btn" data-index="0"></button>
+      <button class="choice-btn" data-index="1"></button>
+      <button class="choice-btn" data-index="2"></button>
+      <button class="choice-btn" data-index="3"></button>
+    </div>
+  </div>
+
+  <!-- ===== 結果画面（1問ごと） ===== -->
+  <div id="result-screen" class="screen">
+    <div class="result-header" id="result-header">
+      <div class="result-icon" id="result-icon">⭕</div>
+      <h2 class="result-title" id="result-title">正解！</h2>
+    </div>
+
+    <div class="result-element-card">
+      <div class="result-element-top">
+        <div class="result-element-info">
+          <span class="result-number" id="r-number"></span>
+          <span class="result-symbol" id="r-symbol"></span>
+          <span class="result-name" id="r-name"></span>
+        </div>
+        <div class="result-image-container" id="r-image-container">
+          <img id="r-image" class="result-image" alt="元素の画像" loading="lazy">
+          <div id="r-image-placeholder" class="result-image-placeholder">
+            <span class="placeholder-symbol" id="r-placeholder-symbol"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-details">
+        <div class="detail-row">
+          <span class="detail-label">📝 特徴</span>
+          <p class="detail-text" id="r-description"></p>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">🔧 用途</span>
+          <p class="detail-text" id="r-uses"></p>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">💰 価格</span>
+          <p class="detail-text" id="r-price"></p>
+        </div>
+      </div>
+    </div>
+
+    <button id="btn-next" class="next-btn">
+      <span>次の問題へ</span>
+      <span class="next-arrow">→</span>
+    </button>
+  </div>
+
+  <!-- ===== サマリー画面（クイズ完了） ===== -->
+  <div id="summary-screen" class="screen">
+    <header class="summary-header">
+      <h2>クイズ結果</h2>
+    </header>
+
+    <div class="summary-content">
+      <div class="summary-score-ring">
+        <svg viewBox="0 0 120 120" class="score-ring">
+          <circle cx="60" cy="60" r="54" class="ring-bg"/>
+          <circle cx="60" cy="60" r="54" class="ring-fill" id="score-ring-fill"/>
+        </svg>
+        <div class="score-text">
+          <span id="score-percent" class="score-percent">0</span>
+          <span class="score-unit">%</span>
+        </div>
+      </div>
+
+      <div class="summary-stats">
+        <div class="stat-item">
+          <span class="stat-value" id="stat-correct">0</span>
+          <span class="stat-label">正解</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="stat-wrong">0</span>
+          <span class="stat-label">不正解</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="stat-streak">0</span>
+          <span class="stat-label">最高連続</span>
+        </div>
+      </div>
+
+      <!-- 間違えた元素一覧 -->
+      <div id="wrong-elements-section" class="wrong-elements-section hidden">
+        <h3>間違えた元素</h3>
+        <div id="wrong-elements-list" class="wrong-elements-list">
+          <!-- 動的に生成 -->
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-actions">
+      <button id="btn-retry" class="action-btn primary">もう一度挑戦</button>
+      <button id="btn-home" class="action-btn secondary">ホームに戻る</button>
+    </div>
+  </div>
+
+  <!-- ===== 学習記録画面 ===== -->
+  <div id="records-screen" class="screen">
+    <header class="records-header">
+      <button id="btn-records-back" class="icon-btn" aria-label="戻る">
+        <span class="icon">←</span>
+      </button>
+      <h2>学習記録</h2>
+      <button id="btn-clear-records" class="icon-btn" aria-label="記録を削除">
+        <span class="icon">🗑️</span>
+      </button>
+    </header>
+
+    <div class="records-content">
+      <!-- 総合スタッツ -->
+      <section class="records-section">
+        <h3>総合成績</h3>
+        <div class="overall-stats">
+          <div class="ostat">
+            <span class="ostat-value" id="rec-total-quizzes">0</span>
+            <span class="ostat-label">総クイズ数</span>
+          </div>
+          <div class="ostat">
+            <span class="ostat-value" id="rec-total-correct">0</span>
+            <span class="ostat-label">総正解数</span>
+          </div>
+          <div class="ostat">
+            <span class="ostat-value" id="rec-avg-rate">0%</span>
+            <span class="ostat-label">平均正答率</span>
+          </div>
+          <div class="ostat">
+            <span class="ostat-value" id="rec-best-streak">0</span>
+            <span class="ostat-label">最高連続</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 苦手な元素 -->
+      <section class="records-section">
+        <h3>苦手な元素 TOP10</h3>
+        <div id="weak-elements-list" class="weak-elements-list">
+          <p class="empty-message">まだ記録がありません</p>
+        </div>
+      </section>
+
+      <!-- 学習履歴 -->
+      <section class="records-section">
+        <h3>学習履歴</h3>
+        <div id="history-list" class="history-list">
+          <p class="empty-message">まだ記録がありません</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- 確認ダイアログ -->
+  <div id="confirm-dialog" class="dialog-overlay hidden">
+    <div class="dialog-box">
+      <p id="dialog-message" class="dialog-message"></p>
+      <div class="dialog-actions">
+        <button id="dialog-cancel" class="dialog-btn cancel">キャンセル</button>
+        <button id="dialog-confirm" class="dialog-btn confirm">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/quiz.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
