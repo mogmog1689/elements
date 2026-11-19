@@ -293,9 +293,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     imgEl.style.display = 'none';
     placeholderEl.style.display = 'flex';
 
-    if (element.image) {
+    if (element && element.image) {
       const src = `images/elements/${element.image}`;
-      imgEl.src = src;
+      // Clean previous src and assign
       imgEl.onload = () => {
         imgEl.style.display = 'block';
         placeholderEl.style.display = 'none';
@@ -304,6 +304,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         imgEl.style.display = 'none';
         placeholderEl.style.display = 'flex';
       };
+      imgEl.src = src;
+      // If already cached and loaded synchronously
+      if (imgEl.complete && imgEl.naturalWidth > 0) {
+        imgEl.style.display = 'block';
+        placeholderEl.style.display = 'none';
+      }
     }
   }
 

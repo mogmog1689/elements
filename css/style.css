@@ -732,13 +732,14 @@ img {
 }
 
 .prev-result-image-container {
-  width: 60px;
-  height: 60px;
-  border-radius: 10px;
+  width: 76px;
+  height: 76px;
+  border-radius: 12px;
   overflow: hidden;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .prev-result-image {
