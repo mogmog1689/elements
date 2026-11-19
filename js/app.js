@@ -295,12 +295,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     placeholderEl.style.display = 'flex';
 
     if (element.image) {
-      const src = `images/elements/${element.image}`;
+      const src = `images/elements/${element.image}?v=11`;
       imgEl.onload = () => {
         imgEl.style.display = 'block';
         placeholderEl.style.display = 'none';
       };
-      imgEl.onerror = () => {
+      imgEl.onerror = (e) => {
+        console.warn(`Failed to load element image: ${src}`, e);
         imgEl.style.display = 'none';
         placeholderEl.style.display = 'flex';
       };
@@ -507,7 +508,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // PWA Service Worker Registration & Update Check
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js?v=10').then(
+      navigator.serviceWorker.register('sw.js?v=11').then(
         reg => {
           console.log('ServiceWorker registered:', reg.scope);
           // Check for worker updates
