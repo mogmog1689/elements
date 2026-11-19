@@ -287,29 +287,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Image load helper with placeholder fallback
+  // 元素画像表示部（ゼロから再設計）
+  // 1. 内蔵画像データ(ELEMENT_IMAGES)を最優先（HTTPリクエスト不要で100%確実に表示）
+  // 2. なければ外部ファイルパスを試行
+  // 3. どちらも存在しない場合のみプレースホルダーを表示
   function setElementImage(element, imgEl, placeholderEl, symbolEl) {
     if (!element) return;
     symbolEl.textContent = element.symbol || '';
-    imgEl.style.display = 'none';
-    placeholderEl.style.display = 'flex';
 
-    if (element.image) {
-      const src = `images/elements/${element.image}?v=11`;
+    const numKey = String(element.number);
+    let imageSrc = null;
+
+    if (typeof ELEMENT_IMAGES !== 'undefined' && ELEMENT_IMAGES[numKey]) {
+      imageSrc = ELEMENT_IMAGES[numKey];
+    } else if (element.image) {
+      imageSrc = `images/elements/${element.image}`;
+    }
+
+    if (imageSrc) {
       imgEl.onload = () => {
         imgEl.style.display = 'block';
         placeholderEl.style.display = 'none';
       };
-      imgEl.onerror = (e) => {
-        console.warn(`Failed to load element image: ${src}`, e);
+      imgEl.onerror = () => {
+        console.warn(`Fallback triggered for element ${element.symbol}`);
         imgEl.style.display = 'none';
         placeholderEl.style.display = 'flex';
       };
-      imgEl.src = src;
-      if (imgEl.complete && imgEl.naturalWidth > 0) {
-        imgEl.style.display = 'block';
-        placeholderEl.style.display = 'none';
-      }
+      imgEl.src = imageSrc;
+      imgEl.style.display = 'block';
+      placeholderEl.style.display = 'none';
+    } else {
+      imgEl.removeAttribute('src');
+      imgEl.style.display = 'none';
+      placeholderEl.style.display = 'flex';
     }
   }
 
@@ -508,7 +519,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // PWA Service Worker Registration & Update Check
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js?v=11').then(
+      navigator.serviceWorker.register('sw.js?v=20').then(
         reg => {
           console.log('ServiceWorker registered:', reg.scope);
           // Check for worker updates
