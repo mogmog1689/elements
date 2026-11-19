@@ -199,6 +199,45 @@
       <button class="choice-btn" data-index="2"></button>
       <button class="choice-btn" data-index="3"></button>
     </div>
+
+    <!-- 前問の解説エリア（次問へ即移行し下部に表示） -->
+    <div id="prev-result-area" class="prev-result-area hidden">
+      <div class="prev-result-header" id="prev-result-header">
+        <span class="prev-result-badge" id="prev-result-badge">⭕ 正解</span>
+        <span class="prev-result-title">前問の解説</span>
+      </div>
+      <div class="prev-result-card">
+        <div class="prev-result-top">
+          <div class="prev-result-info">
+            <span class="prev-result-number" id="prev-number"></span>
+            <div class="prev-result-symbol-name">
+              <span class="prev-result-symbol" id="prev-symbol"></span>
+              <span class="prev-result-name" id="prev-name"></span>
+            </div>
+          </div>
+          <div class="prev-result-image-container" id="prev-image-container">
+            <img id="prev-image" class="prev-result-image" alt="前問元素の写真" loading="lazy">
+            <div id="prev-image-placeholder" class="prev-image-placeholder">
+              <span id="prev-placeholder-symbol" class="placeholder-symbol"></span>
+            </div>
+          </div>
+        </div>
+        <div class="prev-result-details">
+          <div class="prev-detail-item">
+            <span class="prev-label">📝 特徴:</span>
+            <span class="prev-text" id="prev-description"></span>
+          </div>
+          <div class="prev-detail-item">
+            <span class="prev-label">🔧 用途:</span>
+            <span class="prev-text" id="prev-uses"></span>
+          </div>
+          <div class="prev-detail-item">
+            <span class="prev-label">💰 価格:</span>
+            <span class="prev-text" id="prev-price"></span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ===== 結果画面（1問ごと） ===== -->

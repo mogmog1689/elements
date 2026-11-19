@@ -41,9 +41,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   const streakCount = document.getElementById('streak-count');
   const progressBar = document.getElementById('progress-bar');
   const hintArea = document.getElementById('hint-area');
+  const hintLabel = document.querySelector('.hint-label');
   const hintText = document.getElementById('hint-text');
   const hintExplanation = document.getElementById('hint-explanation');
   const choiceBtns = document.querySelectorAll('.choice-btn');
+
+  // Previous Question Result Area Elements (Shown in Quiz Screen)
+  const prevResultArea = document.getElementById('prev-result-area');
+  const prevResultBadge = document.getElementById('prev-result-badge');
+  const prevNumber = document.getElementById('prev-number');
+  const prevSymbol = document.getElementById('prev-symbol');
+  const prevName = document.getElementById('prev-name');
+  const prevImage = document.getElementById('prev-image');
+  const prevPlaceholder = document.getElementById('prev-image-placeholder');
+  const prevPlaceholderSymbol = document.getElementById('prev-placeholder-symbol');
+  const prevDescription = document.getElementById('prev-description');
+  const prevUses = document.getElementById('prev-uses');
+  const prevPrice = document.getElementById('prev-price');
 
   // Question displays
   const symbolQuestion = document.getElementById('symbol-question');
@@ -207,6 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert('選択した条件に該当する問題がありません。出題範囲を変更してください。');
       return;
     }
+    prevResultArea.classList.add('hidden');
     showScreen('quiz');
     displayNextQuestion();
   });
@@ -223,6 +238,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     hintArea.classList.add('hidden');
     btnHint.style.display = q.hint ? 'flex' : 'none';
     if (q.hint) {
+      if (hintLabel) {
+        hintLabel.textContent = q.hint.typeLabel ? `語呂合わせ（${q.hint.typeLabel}）` : '語呂合わせ';
+      }
       hintText.textContent = q.hint.mnemonic || '';
       hintExplanation.textContent = q.hint.explanation || '';
     }
@@ -294,7 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     hintArea.classList.toggle('hidden');
   });
 
-  // Handle Choice Selection
+  // Handle Choice Selection - 即座に次問へ移行し、画面下部に前問解説を表示
   function handleChoiceSelect(selectedBtn, choiceText) {
     choiceBtns.forEach(b => b.classList.add('disabled'));
     const result = Quiz.checkAnswer(choiceText);
@@ -311,44 +329,48 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
 
-    // Short delay before showing result screen
+    // 前問の解説情報をセット
+    updatePrevResultArea(result);
+
+    // 短い演出（300ms）ののち、別画面に飛ばず次の問題へ直接移行
     setTimeout(() => {
-      showQuestionResult(result);
-    }, 600);
+      displayNextQuestion();
+    }, 320);
   }
 
-  // Show Per-Question Result
-  function showQuestionResult(result) {
-    showScreen('result');
+  // 下部の前問解説エリアを更新
+  function updatePrevResultArea(result) {
+    prevResultArea.classList.remove('hidden');
 
-    resultHeader.className = `result-header ${result.isCorrect ? 'correct' : 'wrong'}`;
-    resultIcon.textContent = result.isCorrect ? '⭕' : '❌';
-    resultTitle.textContent = result.isCorrect ? '正解！' : '不正解…';
+    prevResultBadge.className = `prev-result-badge ${result.isCorrect ? 'correct' : 'wrong'}`;
+    prevResultBadge.textContent = result.isCorrect ? '⭕ 正解！' : `❌ 不正解（正解: ${result.correctAnswer}）`;
 
     const el = result.element;
-    rNumber.textContent = `原子番号: ${el.number}`;
-    rSymbol.textContent = el.symbol;
-    rName.textContent = `${el.name_ja} (${el.name_en})`;
+    prevNumber.textContent = `原子番号: ${el.number}`;
+    prevSymbol.textContent = el.symbol;
+    prevName.textContent = `${el.name_ja} (${el.name_en})`;
 
-    rDescription.textContent = el.description || '特徴情報はありません。';
-    rUses.textContent = el.uses || '用途情報はありません。';
+    prevDescription.textContent = el.description || '特徴情報はありません。';
+    prevUses.textContent = el.uses || '用途情報はありません。';
 
     if (el.price_per_gram_jpy != null) {
       const formattedPrice = el.price_per_gram_jpy >= 10000 
         ? `${(el.price_per_gram_jpy).toLocaleString()} 円/g`
         : `${el.price_per_gram_jpy} 円/g`;
-      rPrice.textContent = `約 ${formattedPrice}`;
+      prevPrice.textContent = `約 ${formattedPrice}`;
     } else if (el.price_note) {
-      rPrice.textContent = el.price_note;
+      prevPrice.textContent = el.price_note;
     } else {
-      rPrice.textContent = '取引なし（人工元素・放射性元素等）';
+      prevPrice.textContent = '取引なし（人工元素・放射性元素等）';
     }
 
-    setElementImage(el, rImage, rPlaceholder, rPlaceholderSymbol);
+    setElementImage(el, prevImage, prevPlaceholder, prevPlaceholderSymbol);
   }
 
-  // Next Question Button
-  btnNext.addEventListener('click', () => {
+  // Retry Quiz
+  btnRetry.addEventListener('click', () => {
+    Quiz.start();
+    prevResultArea.classList.add('hidden');
     showScreen('quiz');
     displayNextQuestion();
   });
@@ -394,6 +416,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   btnRetry.addEventListener('click', () => {
     Quiz.start();
+    prevResultArea.classList.add('hidden');
     showScreen('quiz');
     displayNextQuestion();
   });

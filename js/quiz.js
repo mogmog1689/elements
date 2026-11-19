@@ -321,30 +321,84 @@ const Quiz = (() => {
   }
 
   /**
-   * 語呂合わせを検索
+   * 語呂合わせを検索（出題設定（族別・周期別・系列別・全元素）に応じたものを返す）
    */
   function findMnemonic(element) {
-    // まず族別を検索
-    if (mnemonics.groups) {
-      const groupKey = String(element.group);
-      if (mnemonics.groups[groupKey]) {
-        return mnemonics.groups[groupKey];
+    if (!mnemonics) return null;
+
+    // 1. 族別の出題の場合 -> 該当族の語呂合わせを最優先
+    if (config.category === 'group') {
+      const gKey = String(config.subCategory || element.group);
+      if (mnemonics.groups && mnemonics.groups[gKey]) {
+        return {
+          typeLabel: `${gKey}族の語呂合わせ`,
+          ...mnemonics.groups[gKey]
+        };
       }
     }
 
-    // 周期別
-    if (mnemonics.periods) {
-      const periodKey = String(element.period);
-      if (mnemonics.periods[periodKey]) {
-        return mnemonics.periods[periodKey];
+    // 2. 周期別の出題の場合 -> 該当周期の語呂合わせを最優先
+    if (config.category === 'period') {
+      const pKey = String(config.subCategory || element.period);
+      if (mnemonics.periods && mnemonics.periods[pKey]) {
+        return {
+          typeLabel: `第${pKey}周期の語呂合わせ`,
+          ...mnemonics.periods[pKey]
+        };
       }
     }
 
-    // 系列
-    if (element.series && mnemonics.series) {
-      if (mnemonics.series[element.series]) {
-        return mnemonics.series[element.series];
+    // 3. ランタノイド系列の場合
+    if (config.category === 'lanthanide' || (element.series === 'lanthanide' && config.category !== 'group' && config.category !== 'period')) {
+      if (mnemonics.series && mnemonics.series['lanthanide']) {
+        return {
+          typeLabel: 'ランタノイド系列の語呂合わせ',
+          ...mnemonics.series['lanthanide']
+        };
       }
+    }
+
+    // 4. アクチノイド系列の場合
+    if (config.category === 'actinide' || (element.series === 'actinide' && config.category !== 'group' && config.category !== 'period')) {
+      if (mnemonics.series && mnemonics.series['actinide']) {
+        return {
+          typeLabel: 'アクチノイド系列の語呂合わせ',
+          ...mnemonics.series['actinide']
+        };
+      }
+    }
+
+    // 5. 全元素または未指定の場合:
+    // 第1〜第3周期(原子番号1〜18)は有名な「水兵リーベ僕の船…」または周期語呂が覚えやすいため周期別を優先、
+    // それ以降は族別または系列別を探す
+    if (element.period <= 3 && mnemonics.periods && mnemonics.periods[String(element.period)]) {
+      return {
+        typeLabel: `第${element.period}周期の語呂合わせ`,
+        ...mnemonics.periods[String(element.period)]
+      };
+    }
+
+    if (element.series && mnemonics.series && mnemonics.series[element.series]) {
+      return {
+        typeLabel: element.series === 'lanthanide' ? 'ランタノイド系列' : 'アクチノイド系列',
+        ...mnemonics.series[element.series]
+      };
+    }
+
+    const groupKey = String(element.group);
+    if (mnemonics.groups && mnemonics.groups[groupKey]) {
+      return {
+        typeLabel: `${groupKey}族の語呂合わせ`,
+        ...mnemonics.groups[groupKey]
+      };
+    }
+
+    const periodKey = String(element.period);
+    if (mnemonics.periods && mnemonics.periods[periodKey]) {
+      return {
+        typeLabel: `第${periodKey}周期の語呂合わせ`,
+        ...mnemonics.periods[periodKey]
+      };
     }
 
     return null;
