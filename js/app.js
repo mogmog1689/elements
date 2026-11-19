@@ -289,13 +289,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Image load helper with placeholder fallback
   function setElementImage(element, imgEl, placeholderEl, symbolEl) {
-    symbolEl.textContent = element.symbol;
+    if (!element) return;
+    symbolEl.textContent = element.symbol || '';
     imgEl.style.display = 'none';
     placeholderEl.style.display = 'flex';
 
-    if (element && element.image) {
+    if (element.image) {
       const src = `images/elements/${element.image}`;
-      // Clean previous src and assign
       imgEl.onload = () => {
         imgEl.style.display = 'block';
         placeholderEl.style.display = 'none';
@@ -305,7 +305,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         placeholderEl.style.display = 'flex';
       };
       imgEl.src = src;
-      // If already cached and loaded synchronously
       if (imgEl.complete && imgEl.naturalWidth > 0) {
         imgEl.style.display = 'block';
         placeholderEl.style.display = 'none';

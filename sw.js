@@ -1,16 +1,16 @@
-const CACHE_NAME = 'elemaster-v3';
+const CACHE_NAME = 'elemaster-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './css/style.css',
-  './js/storage.js',
-  './js/quiz.js',
-  './js/app.js',
+  './css/style.css?v=2',
+  './js/storage.js?v=2',
+  './js/quiz.js?v=2',
+  './js/app.js?v=2',
   './data/elements.json',
   './data/mnemonics.json',
-  './manifest.json',
-  './images/icons/icon-192.png',
-  './images/icons/icon-512.png'
+  './manifest.json?v=2',
+  './images/icons/icon-192.png?v=2',
+  './images/icons/icon-512.png?v=2'
 ];
 
 self.addEventListener('install', event => {
