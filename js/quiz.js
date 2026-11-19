@@ -27,9 +27,10 @@ const Quiz = (() => {
    */
   async function loadData() {
     try {
+      const v = Date.now();
       const [elemRes, mnemRes] = await Promise.all([
-        fetch('data/elements.json'),
-        fetch('data/mnemonics.json'),
+        fetch(`data/elements.json?v=${v}`),
+        fetch(`data/mnemonics.json?v=${v}`),
       ]);
       elements = await elemRes.json();
       mnemonics = await mnemRes.json();

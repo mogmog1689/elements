@@ -504,11 +504,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // PWA Service Worker Registration
+  // PWA Service Worker Registration & Update Check
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').then(
-        reg => console.log('ServiceWorker registered:', reg.scope),
+      navigator.serviceWorker.register('sw.js?v=10').then(
+        reg => {
+          console.log('ServiceWorker registered:', reg.scope);
+          // Check for worker updates
+          reg.update();
+        },
         err => console.log('ServiceWorker registration failed:', err)
       );
     });
